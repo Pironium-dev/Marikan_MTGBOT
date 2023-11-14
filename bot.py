@@ -1,13 +1,14 @@
 import discord
 import asyncio
+from config import config
 from datetime import datetime, timezone, timedelta
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-WORKING_CHANNEL = 0  # チャンネルのIDを入れる
-ID = ""  # Discordのトークンを入れる
+WORKING_CHANNEL = config().channel
+ID = config.id
 
 channel = None
 
@@ -51,7 +52,6 @@ def set_alarm(month, day, name):
 
 @client.event
 async def on_ready():
-    global channel
     print(f"We have logged in as {client.user}")
     channel = client.get_channel(WORKING_CHANNEL)
     await channel.send("I'm ready.")
@@ -92,12 +92,12 @@ async def on_message(message: discord.Message):
                 n = (int(c[0]), int(c[1]))
                 try:
                     event_delete[(n[0], n[1])].cancel()
-                    del event_delete[(n[0], n[1])]
-                    del event_name[(n[0], n[1])]
                 except KeyError:
                     await message.channel.send("存在しない日付です")
                 else:
-                    await message.channel.send("削除しました")
+                    await message.channel.send(f"{event_name[(n[0], n[1])]}を削除しました")
+                    del event_delete[(n[0], n[1])]
+                    del event_name[(n[0], n[1])]
             elif order[1] == "show":
                 await message.channel.send(
                     f"{NOTIFI_TIME[0]}時{NOTIFI_TIME[1]}分にお知らせします"
