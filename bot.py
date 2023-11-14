@@ -70,43 +70,42 @@ async def on_message(message: discord.Message):
             await message.channel.send("I'm ready.")
             return
         try:
-            match order[1]:
-                case "notify":
-                    c = order[2].split("/")
-                    name = order[3]
-                    await message.channel.send(f"{c[0]}月{c[1]}日にお伝えします")
-                    set_alarm(int(c[0]), int(c[1]), name)
-                case "mtg":
-                    c = order[2].split("/")
-                    target = datetime.now(tz).replace(month=int(c[0]), day=int(c[1]))
-                    name = order[3] + " "
-                    l = [70, 40, 10]
-                    if len(order[4:]) != 0:
-                        l = list(map(int, order[4:]))
-                    for i in l:
-                        t = target - timedelta(days=i)
-                        set_alarm(t.month, t.day, name)
-                        await message.channel.send(f"{t.month}月{t.day}日")
-                    await message.channel.send("にお知らせします。")
-                case "del":
-                    c = order[2].split("/")
-                    n = (int(c[0]), int(c[1]))
-                    try:
-                        event_delete[(n[0], n[1])].cancel()
-                        del event_delete[(n[0], n[1])]
-                        del event_name[(n[0], n[1])]
-                    except KeyError:
-                        await message.channel.send("存在しない日付です")
-                    else:
-                        await message.channel.send("削除しました")
-                case "show":
-                    await message.channel.send(
-                        f"{NOTIFI_TIME[0]}時{NOTIFI_TIME[1]}分にお知らせします"
-                    )
-                    for (a, b), j in event_name.items():
-                        await message.channel.send(f"{a}/{b} {j}")
-                case _:
-                    await message.channel.send("認識されないコマンドが入力されました")
+            if order[1] == "notify":
+                c = order[2].split("/")
+                name = order[3]
+                await message.channel.send(f"{c[0]}月{c[1]}日にお伝えします")
+                set_alarm(int(c[0]), int(c[1]), name)
+            elif order[1] == "mtg":
+                c = order[2].split("/")
+                target = datetime.now(tz).replace(month=int(c[0]), day=int(c[1]))
+                name = order[3] + " "
+                l = [70, 40, 10]
+                if len(order[4:]) != 0:
+                    l = list(map(int, order[4:]))
+                for i in l:
+                    t = target - timedelta(days=i)
+                    set_alarm(t.month, t.day, name)
+                    await message.channel.send(f"{t.month}月{t.day}日")
+                await message.channel.send("にお知らせします。")
+            elif order[1] == "del":
+                c = order[2].split("/")
+                n = (int(c[0]), int(c[1]))
+                try:
+                    event_delete[(n[0], n[1])].cancel()
+                    del event_delete[(n[0], n[1])]
+                    del event_name[(n[0], n[1])]
+                except KeyError:
+                    await message.channel.send("存在しない日付です")
+                else:
+                    await message.channel.send("削除しました")
+            elif order[1] == "show":
+                await message.channel.send(
+                    f"{NOTIFI_TIME[0]}時{NOTIFI_TIME[1]}分にお知らせします"
+                )
+                for (a, b), j in event_name.items():
+                    await message.channel.send(f"{a}/{b} {j}")
+            else:
+                await message.channel.send("認識されないコマンドが入力されました")
         except IndexError as e:
             await message.channel.send("必要な引数が入力されてません")
             raise e
