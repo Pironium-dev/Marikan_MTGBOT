@@ -3,9 +3,6 @@ import asyncio
 from config import config
 from datetime import datetime, timezone, timedelta
 
-# このボットは諸事情によりデバッグできていません。
-# 実行する際にはエラーが出されることが予想されます。
-
 intents = discord.Intents.default()
 intents.message_content = True
 
