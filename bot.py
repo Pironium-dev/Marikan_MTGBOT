@@ -3,6 +3,9 @@ import asyncio
 from config import config
 from datetime import datetime, timezone, timedelta
 
+# このボットは諸事情によりデバッグできていません。
+# 実行する際にはエラーが出されることが予想されます。
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -31,8 +34,7 @@ def alarm():
     del event_delete[(t.month, t.day)]
 
 
-def set_alarm(month, day, name):
-    event_name[(month, day)] = name
+async def set_alarm(month, day, name):
     t = datetime.now(tz)
     target = t.replace(
         month=month,
@@ -44,10 +46,14 @@ def set_alarm(month, day, name):
     )
     if target < t:
         target = target.replace(year=target.year + 1)
+        global message
+        await message.channel.send('来年の')
     a = asyncio.get_running_loop()
     if (month, day) in event_delete:
-        event_delete[(month, day)].cancel()
-    event_delete[(month, day)] = a.call_later((target - t).total_seconds(), alarm)
+        event_name[(month, day)] += '&' + name
+    else:
+        event_name[(month, day)] = name
+        event_delete[(month, day)] = a.call_later((target - t).total_seconds(), alarm)
 
 
 @client.event
@@ -59,6 +65,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
+    global tz
     if message.author == client.user:
         return
     if message.channel.id != WORKING_CHANNEL:
@@ -74,7 +81,7 @@ async def on_message(message: discord.Message):
                 c = order[2].split("/")
                 name = order[3]
                 await message.channel.send(f"{c[0]}月{c[1]}日にお伝えします")
-                set_alarm(int(c[0]), int(c[1]), name)
+                await set_alarm(int(c[0]), int(c[1]), name)
             elif order[1] == "mtg":
                 c = order[2].split("/")
                 target = datetime.now(tz).replace(month=int(c[0]), day=int(c[1]))
@@ -84,7 +91,7 @@ async def on_message(message: discord.Message):
                     l = list(map(int, order[4:]))
                 for i in l:
                     t = target - timedelta(days=i)
-                    set_alarm(t.month, t.day, name)
+                    await set_alarm(t.month, t.day, name)
                     await message.channel.send(f"{t.month}月{t.day}日")
                 await message.channel.send("にお知らせします。")
             elif order[1] == "del":
@@ -104,6 +111,10 @@ async def on_message(message: discord.Message):
                 )
                 for (a, b), j in event_name.items():
                     await message.channel.send(f"{a}/{b} {j}")
+            elif order[1] == "time":
+                await message.channel.send(
+                    str(datetime.now(tz))
+                )
             else:
                 await message.channel.send("認識されないコマンドが入力されました")
         except IndexError as e:
