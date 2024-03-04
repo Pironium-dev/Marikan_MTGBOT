@@ -12,7 +12,8 @@ MTG(ミーティング)をいつ生やせばいいかを知らせてくれるBot
 pip install -r requirements.txt
 ```
 
-config.pyに、チャンネルのID, Discordのトークンを入れてください。
+config.pyに、チャンネルのID, Discordのトークンを入れてください。  
+また、環境変数からも編集できるようになりました。(config.pyのソースコード読んでください)  
 python3.11.3で動作確認しました。
 
 ## コマンド
