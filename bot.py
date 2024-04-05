@@ -10,7 +10,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-WORKING_CHANNEL = config().channel_id
+WORKING_CHANNEL = int(config().channel_id)
 TOKEN = config.token
 
 channel = None
