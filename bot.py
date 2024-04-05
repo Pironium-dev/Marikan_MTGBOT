@@ -11,7 +11,7 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 WORKING_CHANNEL = int(config().channel_id)
-TOKEN = config.token
+TOKEN = config().token
 
 channel = None
 
